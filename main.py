@@ -2,6 +2,9 @@
 #! 0: BFS, 1: DFS, 2: UCS, 3: IDS, 4: GBFS, 5: A*, and 6: HC
 
 
+from cmath import e
+
+
 class Path():
     def __init__(self,source,destination):
         self.source = source
@@ -24,6 +27,7 @@ class Graph():
                 path.reverse()
                 break
         print("path found: ",path)
+        return path
 
     def getExpandList(self,expanded):
         expanded_list = []
@@ -37,21 +41,26 @@ class Graph():
                 return True
         return False
 
-    def isExist(self,frontier,next_node):
-        if(len(frontier)==0):
-            return False
+    def isReached(self,frontier,next_node):
         for i in range(len(frontier)):
             if (frontier[i].destination == next_node):
                 return True
         return False
-            
+
+    def isExisting(self,expanded,init,current_node,next_node):
+        path = self.findPath(expanded,init,current_node)
+        for i in range(len(path)):
+            if (path[i] == next_node):
+                return True
+        return False
+
     def BFS(self,init,goal):
         expanded = []
-        frontier = []
+        queue = []
         temp = Path(init,init)
-        frontier.append(temp) 
-        while(len(frontier) > 0):
-            temp = frontier.pop(0)
+        queue.append(temp) 
+        while(len(queue) > 0):
+            temp = queue.pop(0)
             expanded.append(temp)
             current_node = temp.destination
             for next_node in range(self.num_vertices):
@@ -64,9 +73,34 @@ class Graph():
                     return True
                 #! Nếu node tiếp theo không là goal
                 if(self.cost_table[current_node][next_node] != 0 and next_node != goal):
-                    if(self.isExpanded(expanded,next_node) == False and self.isExist(frontier,next_node) == False):
+                    if(self.isExpanded(expanded,next_node) == False and self.isReached(queue,next_node) == False):
                         temp = Path(current_node,next_node)
-                        frontier.append(temp)
+                        queue.append(temp)
+        print("Path not found")
+        self.getExpandList(expanded)
+    
+    def DFS(self,init,goal):
+        expanded = []
+        stack = []
+        temp = Path(init,init)
+        stack.append(temp)
+        while len(stack) > 0:
+            temp = stack.pop()
+            expanded.append(temp)
+            current_node = temp.destination
+            for next_node in range(self.num_vertices - 1,-1,-1):
+                #! Nếu node tiếp theo là goal thì return 
+                if(self.cost_table[current_node][next_node] != 0 and next_node == goal):
+                    temp = Path(current_node, next_node)
+                    expanded.append(temp)
+                    self.getExpandList(expanded)
+                    self.findPath(expanded,init,goal)
+                    return True
+                #! Nếu node tiếp theo không là goal
+                if(self.cost_table[current_node][next_node] != 0 and next_node != goal):
+                    if(self.isExisting(expanded,init,current_node,next_node) == False):
+                        temp = Path(current_node,next_node)
+                        stack.append(temp)
         print("Path not found")
         self.getExpandList(expanded)
                 
@@ -88,7 +122,7 @@ def main():
         h_table = lines[len(lines)-1]
     #! test alg
     A = Graph(cost_table,h_table,num_vertices)
-    A.BFS(init,goal)
+    A.DFS(init,goal)
 
 if __name__ == "__main__":
      main()

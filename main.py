@@ -1,5 +1,8 @@
 
 #! 0: BFS, 1: DFS, 2: UCS, 3: IDS, 4: GBFS, 5: A*, and 6: HC
+from numpy import Infinity
+
+
 class Path():
     def __init__(self,source,destination):
         self.source = source
@@ -126,38 +129,42 @@ class Graph():
         self.writePath(expanded,False)
         return False
         
-    # def DLS(self,init,goal,limit):
-    #     expanded = []
-    #     frontier = []
-    #     stack = []
-    #     curr = Path(init,init)
-    #     curr.add_level(0)
-    #     stack.append(curr)
-    #     while len(stack) > 0:
-    #         curr = stack.pop()
-    #         expanded.append(curr)
-    #         current_node = curr.destination
-    #         for next_node in range(self.num_vertices - 1,-1,-1):
-    #             #! Nếu node tiếp theo là goal thì return 
-    #             if(self.cost_table[current_node][next_node] != 0 and next_node == goal):
-    #                 temp = Path(current_node, next_node)
-    #                 expanded.append(temp)
-    #                 self.getExpandList(expanded,False)
-    #                 self.findPath(expanded,init,goal)
-    #                 return True
-    #             #! Nếu node tiếp theo không là goal
-    #             if(self.cost_table[current_node][next_node] != 0 and next_node != goal):
-    #                 if(curr.level < limit):
-    #                     if(self.isExisting(expanded,init,current_node,next_node) == False):
-    #                         temp = Path(current_node,next_node)
-    #                         temp.add_cost(curr.cost + 1)
-    #                         stack.append(temp)
-    #     print("Path not found")
-    #     self.getExpandList(expanded,False)
-    #     return False
+    def DLS(self,init,goal,limit):
+        expanded = []
+        frontier = []
+        stack = []
+        curr = Path(init,init)
+        curr.add_level(0)
+        stack.append(curr)
+        while len(stack) > 0:
+            curr = stack.pop()
+            expanded.append(curr)
+            current_node = curr.destination
+            for next_node in range(self.num_vertices - 1,-1,-1):
+                #! Nếu node tiếp theo là goal thì return 
+                if(self.cost_table[current_node][next_node] != 0 and next_node == goal):
+                    if(curr.level < limit):
+                        temp = Path(current_node, next_node)
+                        expanded.append(temp)
+                        self.writeExpandedList(self.getExpandList(expanded,False))
+                        self.writePath(self.findPath(expanded,init,goal),True)
+                        return True
+                #! Nếu node tiếp theo không là goal
+                if(self.cost_table[current_node][next_node] != 0 and next_node != goal):
+                    if(curr.level < limit):
+                        if(self.isExisting(expanded,init,current_node,next_node) == False):
+                            temp = Path(current_node,next_node)
+                            temp.add_level(curr.level + 1)
+                            stack.append(temp)
+        self.writeExpandedList(self.getExpandList(expanded,False))
+        self.writePath(expanded,False)
+        return False
 
-    #def IDS(self,init,goal):
-
+    def IDS(self,init,goal):
+        infinity = len(self.cost_table) - 1
+        for i in range(infinity):
+            if(self.DLS(init,goal,i) == True):
+                break
         
 
                 
@@ -183,6 +190,9 @@ def main():
         A.BFS(init,goal)
     elif(alg_index == 1):
         A.DFS(init,goal)
+    elif(alg_index == 3):
+        A.IDS(init,goal)
+    
 
 if __name__ == "__main__":
      main()

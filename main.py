@@ -273,7 +273,7 @@ class Graph():
 
             for next_node in range(self.num_vertices):
                 #! Nếu node tiếp theo không là goal
-                if(self.cost_table[current_node][next_node] != 0 and self.isExpanded(expanded,next_node) == False):
+                if(self.cost_table[current_node][next_node] != 0 and self.isExpanded(expanded,next_node,init) == False):
                     temp = Path(current_node,next_node)
                     newPath = self.findPath_PQ(expanded.copy(),init,temp)
                     cost = self.CalculateCost(newPath)
@@ -281,12 +281,40 @@ class Graph():
                     self.update_PQ(p_queue,temp)
         self.writeExpandedList(self.getExpandList(expanded,True))
         self.writePath(expanded,False)
-
         return False
+    
+    def AStar(self,init,goal):
+        expanded = []
+        p_queue = []
+        curr = Path(init,init)
+        curr.add_cost(0)
+        hq.heappush(p_queue,(curr.cost,curr)) 
+        while(len(p_queue) > 0):
+            temp = hq.heappop(p_queue)
+            curr = temp[1]
+            expanded.append(curr)
+            current_node = curr.destination
+            #! Nếu node hiện tại là goal thì return 
+            if(current_node == goal):
+               self.writeExpandedList(self.getExpandList(expanded,True))
+               self.writePath(self.findPath(expanded,init,goal),True)
+               return True
+            for next_node in range(self.num_vertices):
+                #! Nếu node tiếp theo không là goal
+                if(self.cost_table[current_node][next_node] != 0 and self.isExpanded(expanded,next_node,init) == False):
+                    temp = Path(current_node,next_node)
+                    newPath = self.findPath_PQ(expanded.copy(),init,temp)
+                    cost = self.CalculateCost(newPath) + self.h_table[next_node]
+                    temp.add_cost(cost)
+                    self.update_PQ(p_queue,temp)
+        self.writeExpandedList(self.getExpandList(expanded,True))
+        self.writePath(expanded,False)
+        return False
+
 def main():
-    #filename = 'input.txt'
+    filename = 'input1.txt'
     #filename = 'input2.txt'
-    filename = 'input3.txt' 
+    #filename = 'input3.txt' 
     #! get data from file .txt
     with open(filename) as file_object:
         lines = file_object.readlines()
@@ -314,7 +342,8 @@ def main():
         A.IDS(init,goal)
     elif(alg_index == 4):
         A.GBFS(init,goal)
-    
+    elif(alg_index == 5):
+        A.AStar(init,goal)
 
 if __name__ == "__main__":
      main()

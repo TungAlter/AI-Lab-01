@@ -310,11 +310,47 @@ class Graph():
         self.writeExpandedList(self.getExpandList(expanded,True))
         self.writePath(expanded,False)
         return False
+    
+    def HC(self,init,goal):
+        expanded = []
+        neighbors = []
+        curr = Path(init,init)
+        while(True):
+            expanded.append(curr)
+            current_node = curr.destination
+            if(current_node == goal):
+               self.writeExpandedList(self.getExpandList(expanded,True))
+               self.writePath(self.findPath(expanded,init,goal),True)
+               return True
+            for next_node in range(self.num_vertices):
+                if(self.cost_table[current_node][next_node] != 0 and next_node == goal):
+                    temp = Path(current_node,next_node)
+                    neighbors.clear()
+                    neighbors.append(temp)
+                    break
+                #! Nếu node tiếp theo không là goal
+                if(self.cost_table[current_node][next_node] != 0 and self.isExpanded(expanded,next_node,init) == False):
+                    temp = Path(current_node,next_node)
+                    cost = self.cost_table[current_node][next_node] + self.h_table[next_node]
+                    temp.add_cost(cost)
+                    neighbors.append(temp)
+            if(len(neighbors) == 0):
+                break
+            else:
+                best_choice = neighbors[0]  
+                for i in range (1,len(neighbors)):
+                    if(neighbors[i].cost < best_choice.cost):
+                        best_choice = neighbors[i]
+                curr = best_choice
+                neighbors.clear()
+        self.writeExpandedList(self.getExpandList(expanded,True))
+        self.writePath(expanded,False)
+        return False   
 
 def main():
-    filename = 'input1.txt'
+    #filename = 'input1.txt'
     #filename = 'input2.txt'
-    #filename = 'input3.txt' 
+    filename = 'input3.txt' 
     #! get data from file .txt
     with open(filename) as file_object:
         lines = file_object.readlines()
@@ -344,6 +380,8 @@ def main():
         A.GBFS(init,goal)
     elif(alg_index == 5):
         A.AStar(init,goal)
+    elif(alg_index == 6):
+        A.HC(init,goal)
 
 if __name__ == "__main__":
      main()

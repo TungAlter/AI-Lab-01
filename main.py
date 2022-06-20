@@ -11,7 +11,8 @@ class Path():
     
     def add_cost(self,cost):
         self.cost = cost
-     # defining comparators less_than and equals
+
+    #! defining comparators less_than and equals
     def __lt__(self, other):
         return self.destination < other.destination
 
@@ -47,6 +48,47 @@ class Graph():
                 break
         return path
     
+    def findPath_PQ(self,expanded,init,a):
+        path = []
+        expanded.append(a)
+        current = a.destination
+        for i in range(len(expanded)-1,-1,-1):
+            if(expanded[i].destination == current):
+                path.append(current)
+                current = expanded[i].source
+            if(current == init):
+                path.append(current)
+                path.reverse()
+                break
+        return path
+
+    def update_PQ(self,PQ,a):
+        check = False
+        isExisting = False
+        for i in range(len(PQ)):
+            if(PQ[i][1].destination == a.destination):
+                isExisting = True
+                if(PQ[i][1].cost > a.cost):
+                    PQ.pop(i)
+                    hq.heappush(PQ,(a.cost,a))
+                    check = True
+                    return check
+                else:
+                    return False
+        if(isExisting == False):
+            hq.heappush(PQ,(a.cost,a))
+            check = True
+        return check
+
+    def CalculateCost(self,path):
+        cost = 0
+        for i in range(len(path)-1):
+            j = i + 1
+            current_node = path[i]
+            next_node = path[j]
+            cost += self.cost_table[current_node][next_node]
+        return cost 
+
     def writeExpandedList(self,expanded_list):
         filename = "output.txt"
         with open(filename, 'w') as f:
@@ -64,8 +106,11 @@ class Graph():
             expanded_list.pop()
         return expanded_list
 
-    def isExpanded(self,expanded,next_node):
+    def isExpanded(self,expanded,next_node,init):
         for i in range(len(expanded)):
+            if(expanded[i].source == init):
+                if(expanded[i].destination == next_node):
+                    return True
             if(expanded[i].source == next_node):
                 return True
         return False
@@ -108,7 +153,7 @@ class Graph():
                     return True
                 #! Nếu node tiếp theo không là goal
                 if(self.cost_table[current_node][next_node] != 0 and next_node != goal):
-                    if(self.isExpanded(expanded,next_node) == False and self.isReached(queue,next_node) == False):
+                    if(self.isExpanded(expanded,next_node,init) == False and self.isReached(queue,next_node) == False):
                         temp = Path(current_node,next_node)
                         queue.append(temp)
         self.writeExpandedList(self.getExpandList(expanded,False))
@@ -200,7 +245,7 @@ class Graph():
                     return True
                 #! Nếu node tiếp theo không là goal
                 if(self.cost_table[current_node][next_node] != 0 and next_node != goal):
-                    if(self.isExpanded(expanded,next_node) == False and self.isReached_PQ(p_queue,next_node) == False):
+                    if(self.isExpanded(expanded,next_node,init) == False and self.isReached_PQ(p_queue,next_node) == False):
                         temp = Path(current_node,next_node)
                         h_value = self.h_table[next_node]
                         temp.add_cost(h_value)
@@ -208,9 +253,40 @@ class Graph():
         self.writeExpandedList(self.getExpandList(expanded,False))
         self.writePath(expanded,False)
         return False
-                
+
+    def UCS(self,init,goal):
+        expanded = []
+        p_queue = []
+        curr = Path(init,init)
+        curr.add_cost(0)
+        hq.heappush(p_queue,(curr.cost,curr)) 
+        while(len(p_queue) > 0):
+            temp = hq.heappop(p_queue)
+            curr = temp[1]
+            expanded.append(curr)
+            current_node = curr.destination
+            #! Nếu node hiện tại là goal thì return 
+            if(current_node == goal):
+               self.writeExpandedList(self.getExpandList(expanded,True))
+               self.writePath(self.findPath(expanded,init,goal),True)
+               return True
+
+            for next_node in range(self.num_vertices):
+                #! Nếu node tiếp theo không là goal
+                if(self.cost_table[current_node][next_node] != 0 and self.isExpanded(expanded,next_node) == False):
+                    temp = Path(current_node,next_node)
+                    newPath = self.findPath_PQ(expanded.copy(),init,temp)
+                    cost = self.CalculateCost(newPath)
+                    temp.add_cost(cost)
+                    self.update_PQ(p_queue,temp)
+        self.writeExpandedList(self.getExpandList(expanded,True))
+        self.writePath(expanded,False)
+
+        return False
 def main():
-    filename = 'input3.txt'
+    #filename = 'input.txt'
+    #filename = 'input2.txt'
+    filename = 'input3.txt' 
     #! get data from file .txt
     with open(filename) as file_object:
         lines = file_object.readlines()
@@ -232,6 +308,8 @@ def main():
         A.BFS(init,goal)
     elif(alg_index == 1):
         A.DFS(init,goal)
+    elif(alg_index == 2):
+        A.UCS(init,goal)
     elif(alg_index == 3):
         A.IDS(init,goal)
     elif(alg_index == 4):

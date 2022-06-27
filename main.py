@@ -12,7 +12,7 @@ class Path():
     def add_cost(self,cost):
         self.cost = cost
 
-    #! defining comparators less_than and equals
+    #! defining comparators less than and equals
     def __lt__(self, other):
         return self.destination < other.destination
 
@@ -331,7 +331,7 @@ class Graph():
                 #! Nếu node tiếp theo không là goal
                 if(self.cost_table[current_node][next_node] != 0 and self.isExpanded(expanded,next_node,init) == False):
                     temp = Path(current_node,next_node)
-                    cost = self.cost_table[current_node][next_node] + self.h_table[next_node]
+                    cost = self.h_table[next_node]
                     temp.add_cost(cost)
                     neighbors.append(temp)
             if(len(neighbors) == 0):
@@ -348,9 +348,9 @@ class Graph():
         return False   
 
 def main():
-    #filename = 'input1.txt'
+    filename = 'input1.txt'
     #filename = 'input2.txt'
-    filename = 'input3.txt' 
+    #filename = 'input3.txt' 
     #! get data from file .txt
     with open(filename) as file_object:
         lines = file_object.readlines()

@@ -16,7 +16,7 @@ class Path():
     def __lt__(self, other):
         return self.destination < other.destination
 
-    def __eq__(self, other):
+    def __lt__(self, other):
         return self.destination < other.destination
 class Graph():
     def __init__(self,cost_table,h_table,num_vertices):
@@ -38,20 +38,6 @@ class Graph():
     def findPath(self,expanded,init,goal):
         path = []
         current = goal
-        for i in range(len(expanded)-1,-1,-1):
-            if(expanded[i].destination == current):
-                path.append(current)
-                current = expanded[i].source
-            if(current == init):
-                path.append(current)
-                path.reverse()
-                break
-        return path
-    
-    def findPath_PQ(self,expanded,init,a):
-        path = []
-        expanded.append(a)
-        current = a.destination
         for i in range(len(expanded)-1,-1,-1):
             if(expanded[i].destination == current):
                 path.append(current)
@@ -275,7 +261,9 @@ class Graph():
                 #! Nếu node tiếp theo không là goal
                 if(self.cost_table[current_node][next_node] != 0 and self.isExpanded(expanded,next_node,init) == False):
                     temp = Path(current_node,next_node)
-                    newPath = self.findPath_PQ(expanded.copy(),init,temp)
+                    temp_expanded = expanded.copy()
+                    temp_expanded.append(temp)
+                    newPath = self.findPath(temp_expanded,init,temp.destination)
                     cost = self.CalculateCost(newPath)
                     temp.add_cost(cost)
                     self.update_PQ(p_queue,temp)
@@ -303,7 +291,9 @@ class Graph():
                 #! Nếu node tiếp theo không là goal
                 if(self.cost_table[current_node][next_node] != 0 and self.isExpanded(expanded,next_node,init) == False):
                     temp = Path(current_node,next_node)
-                    newPath = self.findPath_PQ(expanded.copy(),init,temp)
+                    temp_expanded = expanded.copy()
+                    temp_expanded.append(temp)
+                    newPath = self.findPath(temp_expanded,init,temp.destination)
                     cost = self.CalculateCost(newPath) + self.h_table[next_node]
                     temp.add_cost(cost)
                     self.update_PQ(p_queue,temp)
@@ -348,8 +338,8 @@ class Graph():
         return False   
 
 def main():
-    filename = 'input1.txt'
-    #filename = 'input2.txt'
+    #filename = 'input1.txt'
+    filename = 'input2.txt'
     #filename = 'input3.txt' 
     #! get data from file .txt
     with open(filename) as file_object:

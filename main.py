@@ -168,6 +168,7 @@ class Graph():
                     if(self.isExisting(expanded,source,current_node,next_node) == False):
                         temp = Node(current_node,next_node)
                         stack.append(temp)
+        #! if didn't find the path 
         self.writeExpandedList(self.getExpandList(expanded,False))
         self.writePath(expanded,False)
         return False
@@ -198,6 +199,7 @@ class Graph():
                             temp = Node(current_node,next_node)
                             temp.add_level(curr.level + 1)
                             stack.append(temp)
+        #! if didn't find the path 
         self.writeExpandedList(self.getExpandList(expanded,False))
         self.writePath(expanded,False)
         return False
@@ -235,6 +237,7 @@ class Graph():
                         h_value = self.h_table[next_node]
                         temp.add_cost(h_value)
                         hq.heappush(p_queue,(temp.cost,temp))
+        #! if didn't find the path 
         self.writeExpandedList(self.getExpandList(expanded,False))
         self.writePath(expanded,False)
         return False
@@ -250,14 +253,14 @@ class Graph():
             curr = temp[1]
             expanded.append(curr)
             current_node = curr.index
-            #! if next node is destination node  
+            #! if current node is destination node  
             if(current_node == destination):
                self.writeExpandedList(self.getExpandList(expanded,True))
                self.writePath(self.findPath(expanded,source,destination),True)
                return True
 
+            #! if next node is not expanded
             for next_node in range(self.num_vertices):
-            #! if next node is not destination node 
                 if(self.cost_table[current_node][next_node] != 0 and self.isExpanded(expanded,next_node,source) == False):
                     temp = Node(current_node,next_node)
                     temp_expanded = expanded.copy()
@@ -281,13 +284,13 @@ class Graph():
             curr = temp[1]
             expanded.append(curr)
             current_node = curr.index
-            #! if next node is destination node  
+            #! if current node is destination node  
             if(current_node == destination):
                self.writeExpandedList(self.getExpandList(expanded,True))
                self.writePath(self.findPath(expanded,source,destination),True)
                return True
             for next_node in range(self.num_vertices):
-                #! if next node is not destination node 
+                #! if next node is not expanded
                 if(self.cost_table[current_node][next_node] != 0 and self.isExpanded(expanded,next_node,source) == False):
                     temp = Node(current_node,next_node)
                     temp_expanded = expanded.copy()
@@ -307,10 +310,12 @@ class Graph():
         while(True):
             expanded.append(curr)
             current_node = curr.index
+            #! if current node is destination node
             if(current_node == destination):
                self.writeExpandedList(self.getExpandList(expanded,True))
                self.writePath(self.findPath(expanded,source,destination),True)
                return True
+            #! if next node is destination node
             for next_node in range(self.num_vertices):
                 if(self.cost_table[current_node][next_node] != 0 and next_node == destination):
                     temp = Node(current_node,next_node)
@@ -323,6 +328,7 @@ class Graph():
                     cost = self.h_table[next_node]
                     temp.add_cost(cost)
                     neighbors.append(temp)
+            #! select the lowest h value node among neighbors to be the next current node
             if(len(neighbors) == 0):
                 break
             else:
